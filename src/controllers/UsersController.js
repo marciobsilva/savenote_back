@@ -1,7 +1,7 @@
 class UsersController {
   create(req, res) {
     const { name, email, password } = req.body; //Para a comunicação via JSON
-    res.json({ name, email, password })
+    res.status(201).json({ name, email, password })
   }
 }
 
