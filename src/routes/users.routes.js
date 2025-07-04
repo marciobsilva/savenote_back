@@ -1,17 +1,14 @@
 const { Router } = require("express")
 
+const UsersController = require("../controllers/UsersController")
+const MessagesController = require("../controllers/MessagesController")
+
 const usersRouter = Router()
 
-usersRouter.get("/:name", (req, res) => {
-  const { name } = req.params //Obrigatório para a rota
-  const { page, limit = 10 } = req.query //Livre escolha para a rota
-  res.send(`Hello, ${name}! Você está na página ${ page ? page : 1 } 
-    com limite de ${limit}!`)
-})
+const usersController = new UsersController()
+const messagesController = new MessagesController()
 
-usersRouter.post("/", (req, res) => {
-  const { name, email, password } = req.body; //Para a comunicação via JSON
-  res.json({ name, email, password })
-})
+usersRouter.get("/:name", messagesController.show)
+usersRouter.post("/", usersController.create)
 
 module.exports = usersRouter
