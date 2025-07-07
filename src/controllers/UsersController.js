@@ -1,5 +1,5 @@
 const AppError = require("../utils/AppError")
-const { hash } = require("bcrypt")
+const { hash, compare } = require("bcrypt")
 
 const sqliteConnection = require('../database/sqlite')
 
@@ -26,24 +26,40 @@ class UsersController {
   }
 
   async update(req, res) {
-    const { name, email } = req.body
+    const { name, email, password, old_password } = req.body
     const { id } = req.params
 
     const database = await sqliteConnection()
 
     const checkUserExists = await database.get("SELECT * FROM users WHERE id = ?", [id])
-
-    if(!checkUserExists){
+    if(!checkUserExists) 
       throw new AppError("Usuário não encontrado")
-    }
 
     const checkEmailExists = await database.get("SELECT * FROM users WHERE email = ?", [email])
-
-    if(checkEmailExists && id != checkEmailExists.id){
+    if(checkEmailExists && id != checkEmailExists.id) 
       throw new AppError("Email já cadastrado")
+
+    if( password && !old_password) {
+      throw new AppError("Senha antiga obrigatória para atualizar a senha")
     }
 
-    await database.run("UPDATE users SET name=?, email=?, updated_at=? WHERE id=?", [name, email, new Date(), id])
+    if(password && old_password) {
+      const checkOldPassword = await compare(old_password, checkUserExists.password)
+
+      if(!checkOldPassword) {
+        throw new AppError("Senha antiga não confere")
+      }
+      
+    }
+    
+    await database.run("UPDATE users SET name=?, email=?, password=?, updated_at=DATETIME('now') WHERE id=?", 
+      [
+        name ?? checkUserExists.name, 
+        email ?? checkUserExists.email, 
+        password ? await hash(password, 8) : checkUserExists.password, 
+        id
+      ]
+    )
     
     return res.json()
   }
