@@ -22,7 +22,30 @@ class UsersController {
        [name, email, hashedPassword]
     )
 
-    res.status(201).json()
+    return res.status(201).json()
+  }
+
+  async update(req, res) {
+    const { name, email } = req.body
+    const { id } = req.params
+
+    const database = await sqliteConnection()
+
+    const checkUserExists = await database.get("SELECT * FROM users WHERE id = ?", [id])
+
+    if(!checkUserExists){
+      throw new AppError("Usuário não encontrado")
+    }
+
+    const checkEmailExists = await database.get("SELECT * FROM users WHERE email = ?", [email])
+
+    if(checkEmailExists && id != checkEmailExists.id){
+      throw new AppError("Email já cadastrado")
+    }
+
+    await database.run("UPDATE users SET name=?, email=?, updated_at=? WHERE id=?", [name, email, new Date(), id])
+    
+    return res.json()
   }
 }
 

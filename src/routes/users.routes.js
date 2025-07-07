@@ -21,5 +21,6 @@ const messagesController = new MessagesController()
 
 usersRouter.get("/:name", messagesController.show)
 usersRouter.post("/", myMiddleware, usersController.create)
+usersRouter.put("/:id", usersController.update)
 
 module.exports = usersRouter
