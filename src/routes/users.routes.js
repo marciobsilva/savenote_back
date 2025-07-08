@@ -4,7 +4,7 @@ const AppError = require("../utils/AppError")
 const UsersController = require("../controllers/UsersController")
 const MessagesController = require("../controllers/MessagesController")
 
-const usersRouter = Router()
+const userRoutes = Router()
 
 function myMiddleware(req, res, next) { //Validar antes de executar no controller
   const { isAdmin = false } = req.body;
@@ -19,8 +19,8 @@ function myMiddleware(req, res, next) { //Validar antes de executar no controlle
 const usersController = new UsersController()
 const messagesController = new MessagesController()
 
-usersRouter.get("/:name", messagesController.show)
-usersRouter.post("/", myMiddleware, usersController.create)
-usersRouter.put("/:id", usersController.update)
+userRoutes.get("/:name", messagesController.show)
+userRoutes.post("/", myMiddleware, usersController.create)
+userRoutes.put("/:id", usersController.update)
 
-module.exports = usersRouter
+module.exports = userRoutes
