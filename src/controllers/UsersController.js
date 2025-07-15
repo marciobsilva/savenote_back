@@ -27,16 +27,17 @@ class UsersController {
 
   async update(req, res) {
     const { name, email, password, old_password } = req.body
-    const { id } = req.params
+    // Quem define o valor na requisição abaixo é o middleware de requisição
+    const user_id = req.user_id
 
     const database = await sqliteConnection()
 
-    const checkUserExists = await database.get("SELECT * FROM users WHERE id = ?", [id])
+    const checkUserExists = await database.get("SELECT * FROM users WHERE id = ?", [user_id])
     if(!checkUserExists) 
       throw new AppError("Usuário não encontrado")
 
     const checkEmailExists = await database.get("SELECT * FROM users WHERE email = ?", [email])
-    if(checkEmailExists && id != checkEmailExists.id) 
+    if(checkEmailExists && user_id != checkEmailExists.id) 
       throw new AppError("Email já cadastrado")
 
     if( password && !old_password) {
@@ -57,7 +58,7 @@ class UsersController {
         name ?? checkUserExists.name, 
         email ?? checkUserExists.email, 
         password ? await hash(password, 8) : checkUserExists.password, 
-        id
+        user_id
       ]
     )
     

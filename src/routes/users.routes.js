@@ -1,26 +1,12 @@
 const { Router } = require("express")
-const AppError = require("../utils/AppError")
 
+const ensureAuthenticated = require("../middlewares/ensureAuthenticated")
 const UsersController = require("../controllers/UsersController")
-const MessagesController = require("../controllers/MessagesController")
-
-const userRoutes = Router()
-
-function myMiddleware(req, res, next) { //Validar antes de executar no controller
-  const { isAdmin = false } = req.body;
-
-  if(!isAdmin) {
-    throw new AppError("User unauthorized", 401)
-  }
-
-  next()
-}
 
 const usersController = new UsersController()
-const messagesController = new MessagesController()
+const userRoutes = Router()
 
-userRoutes.get("/:name", messagesController.show)
-userRoutes.post("/", myMiddleware, usersController.create)
-userRoutes.put("/:id", usersController.update)
+userRoutes.post("/", usersController.create)
+userRoutes.put("/", ensureAuthenticated, usersController.update)
 
 module.exports = userRoutes

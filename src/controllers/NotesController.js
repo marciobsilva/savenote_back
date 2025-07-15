@@ -3,7 +3,8 @@ const AppError = require("../utils/AppError")
 
 class NotesController {
     async index(req, res) {
-        const { user_id, title, tags } = req.query
+        const { title, tags } = req.query
+        const user_id = req.user_id
 
         const notesQuery = knex("notes")
             .select([
@@ -46,7 +47,7 @@ class NotesController {
 
     async create(req, res) {
         const { title, description, tags, links } = req.body
-        const { user_id } = req.params
+        const user_id  = req.user_id
 
         const [ note_id ] = await knex("notes").insert({title, description, user_id})
 
