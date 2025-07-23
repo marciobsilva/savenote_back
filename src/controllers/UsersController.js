@@ -1,23 +1,17 @@
 const AppError = require("../utils/AppError")
-const { hash, compare } = require("bcrypt")
+const { compare } = require("bcrypt")
 
 const UserRepository = require('../repositories/UserRepository')
+const UserCreateService = require('../services/UserCreateService')
 
 class UsersController {
   async create(req, res) {
-    const { name, email, password } = req.body; //Para a comunicação via JSON
+    const { name, email, password } = req.body; 
 
-    const userRepository = UserRepository()
-
-    const checkUserExists = await userRepository.findByEmail( email )
-
-    if(checkUserExists) {
-      throw new AppError("Este e-mail já está cadastrado!")
-    }
-
-    const hashedPassword = await hash(password, 8)
-
-    await userRepository.create({ name, email, password: hashedPassword })
+    const userRepository = new UserRepository()
+    const userCreateService = new UserCreateService( userRepository )
+    
+    await userCreateService.execute({ name, email, password })
 
     return res.status(201).json()
   }
@@ -27,7 +21,7 @@ class UsersController {
     // Quem define o valor na requisição abaixo é o middleware de requisição
     const id = req.user_id
 
-    const userRepository = UserRepository()
+    const userRepository = new UserRepository()
 
     const checkUserExists = await userRepository.findById( id )
     if(!checkUserExists) 
